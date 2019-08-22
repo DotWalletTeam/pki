@@ -70,6 +70,8 @@ PKI体系操作和链上协议操作互为镜像，即，每进行一次PKI动�
 
 PKI工具采用openssl
 
+本部分除CA密钥对生成外，可参照[《搭建私有CA服务器》](https://www.cnblogs.com/zhaojiedi1992/p/zhaojiedi_linux_011_ca.html)实现
+
 ##### CA密钥对生成
 
 ~~~bash
