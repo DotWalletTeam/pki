@@ -1,3 +1,5 @@
+## 基于比特币的PKI体系设计
+
 ### 引言
 
 方案号：BPKI-01
@@ -9,6 +11,172 @@
 信任根是指，CA证书或对CA证书进行签名使用的密码算法及密钥对为比特币对应的密码算法及密钥对，即，对CA证书的签名使用ECDSA，且密钥可在比特币中找到对应地址。
 
 其余部分与通常的PKI体系相同，并采用X509证书格式。
+
+#### 典型X509证书格式与比特币密钥对对应关系
+
+##### 证书格式
+
+~~~ASN.1
+Certificate::=SEQUENCE{
+         tbsCertificate      TBSCertificate,
+          signatureAlgorithm  AlgorithmIdentifier,
+          signatureValue      BIT STRING
+ 
+}
+~~~
+
+~~~ASN.1
+TBSCertificate::=SEQUENCE{
+    version           [0]   EXPLICIT Version DEFAULT v1,
+ 
+    serialNumber            CertificateSerialNumber,
+ 
+    signature               AlgorithmIdentifier,
+ 
+    issuer                  Name,
+ 
+    validity                Validity,
+ 
+    subject                 Name,
+ 
+    subjectPublicKeyInfo    SubjectPublicKeyInfo,
+ 
+    issuerUniqueID    [1]   IMPLICIT UniqueIdentifier OPTIONAL,
+ 
+    subjectUniqueID   [2]   IMPLICIT UniqueIdentifier OPTIONAL,
+    extensions        [3]   EXPLICIT Extensions OPTIONAL
+}
+~~~
+
+##### 自签名CA证书样本（Base64）
+
+~~~
+-----BEGIN CERTIFICATE-----
+MIICGDCCAb2gAwIBAgIJAL9fOvxY+NlSMAoGCCqGSM49BAMCMGgxCzAJBgNVBAYT
+AkNOMQ4wDAYDVQQIDAVDaGluYTEQMA4GA1UEBwwHQmVpamluZzETMBEGA1UECgwK
+TW9ua2V5bG9yZDENMAsGA1UECwwEVGVzdDETMBEGA1UEAwwKTW9ua2V5bG9yZDAe
+Fw0xOTA4MDgwNTI2MDJaFw0yOTA4MDUwNTI2MDJaMGgxCzAJBgNVBAYTAkNOMQ4w
+DAYDVQQIDAVDaGluYTEQMA4GA1UEBwwHQmVpamluZzETMBEGA1UECgwKTW9ua2V5
+bG9yZDENMAsGA1UECwwEVGVzdDETMBEGA1UEAwwKTW9ua2V5bG9yZDBWMBAGByqG
+SM49AgEGBSuBBAAKA0IABM9PjbJOtclq+ZztFqxuUkXvBdppmmkj6a/zgn/tpbsg
+JB/uE83b/+XzI5RpW07BYXDAKoqpHrg9Nff+xdJ53LmjUzBRMB0GA1UdDgQWBBSb
+/11AaEiyI9VoRo+k57qZmaBrxDAfBgNVHSMEGDAWgBSb/11AaEiyI9VoRo+k57qZ
+maBrxDAPBgNVHRMBAf8EBTADAQH/MAoGCCqGSM49BAMCA0kAMEYCIQC5rPWCYMkp
+ptwvelwmI6Z14FHgJX4m23NpFnh6tTRo6QIhAO+lPTQudLvb1c1twqKRX9OeyTKO
+6RHOJPS+z7QunL7M
+-----END CERTIFICATE-----
+~~~
+
+##### ASN1格式
+
+~~~ASN.1
+SEQUENCE (3 elem)
+  SEQUENCE (8 elem)
+    [0] (1 elem)
+      INTEGER 2
+    INTEGER (64 bit) 13789805439530621266
+    SEQUENCE (1 elem)
+      OBJECT IDENTIFIER 1.2.840.10045.4.3.2 ecdsaWithSHA256 (ANSI X9.62 ECDSA algorithm with SHA256)
+    SEQUENCE (6 elem)
+      SET (1 elem)
+        SEQUENCE (2 elem)
+          OBJECT IDENTIFIER 2.5.4.6 countryName (X.520 DN component)
+          PrintableString CN
+      SET (1 elem)
+        SEQUENCE (2 elem)
+          OBJECT IDENTIFIER 2.5.4.8 stateOrProvinceName (X.520 DN component)
+          UTF8String China
+      SET (1 elem)
+        SEQUENCE (2 elem)
+          OBJECT IDENTIFIER 2.5.4.7 localityName (X.520 DN component)
+          UTF8String Beijing
+      SET (1 elem)
+        SEQUENCE (2 elem)
+          OBJECT IDENTIFIER 2.5.4.10 organizationName (X.520 DN component)
+          UTF8String Monkeylord
+      SET (1 elem)
+        SEQUENCE (2 elem)
+          OBJECT IDENTIFIER 2.5.4.11 organizationalUnitName (X.520 DN component)
+          UTF8String Test
+      SET (1 elem)
+        SEQUENCE (2 elem)
+          OBJECT IDENTIFIER 2.5.4.3 commonName (X.520 DN component)
+          UTF8String Monkeylord
+    SEQUENCE (2 elem)
+      UTCTime 2019-08-08 05:26:02 UTC
+      UTCTime 2029-08-05 05:26:02 UTC
+    SEQUENCE (6 elem)
+      SET (1 elem)
+        SEQUENCE (2 elem)
+          OBJECT IDENTIFIER 2.5.4.6 countryName (X.520 DN component)
+          PrintableString CN
+      SET (1 elem)
+        SEQUENCE (2 elem)
+          OBJECT IDENTIFIER 2.5.4.8 stateOrProvinceName (X.520 DN component)
+          UTF8String China
+      SET (1 elem)
+        SEQUENCE (2 elem)
+          OBJECT IDENTIFIER 2.5.4.7 localityName (X.520 DN component)
+          UTF8String Beijing
+      SET (1 elem)
+        SEQUENCE (2 elem)
+          OBJECT IDENTIFIER 2.5.4.10 organizationName (X.520 DN component)
+          UTF8String Monkeylord
+      SET (1 elem)
+        SEQUENCE (2 elem)
+          OBJECT IDENTIFIER 2.5.4.11 organizationalUnitName (X.520 DN component)
+          UTF8String Test
+      SET (1 elem)
+        SEQUENCE (2 elem)
+          OBJECT IDENTIFIER 2.5.4.3 commonName (X.520 DN component)
+          UTF8String Monkeylord
+    SEQUENCE (2 elem)
+      SEQUENCE (2 elem)
+        OBJECT IDENTIFIER 1.2.840.10045.2.1 ecPublicKey (ANSI X9.62 public key type)
+        OBJECT IDENTIFIER 1.3.132.0.10 secp256k1 (SECG (Certicom) named elliptic curve)
+      BIT STRING (520 bit) 0000010011001111010011111000110110110010010011101011010111001001011010…
+    [3] (1 elem)
+      SEQUENCE (3 elem)
+        SEQUENCE (2 elem)
+          OBJECT IDENTIFIER 2.5.29.14 subjectKeyIdentifier (X.509 extension)
+          OCTET STRING (1 elem)
+            OCTET STRING (20 byte) 9BFF5D406848B223D568468FA4E7BA9999A06BC4
+        SEQUENCE (2 elem)
+          OBJECT IDENTIFIER 2.5.29.35 authorityKeyIdentifier (X.509 extension)
+          OCTET STRING (1 elem)
+            SEQUENCE (1 elem)
+              [0] (20 byte) 9BFF5D406848B223D568468FA4E7BA9999A06BC4
+        SEQUENCE (3 elem)
+          OBJECT IDENTIFIER 2.5.29.19 basicConstraints (X.509 extension)
+          BOOLEAN true
+          OCTET STRING (1 elem)
+            SEQUENCE (1 elem)
+              BOOLEAN true
+  SEQUENCE (1 elem)
+    OBJECT IDENTIFIER 1.2.840.10045.4.3.2 ecdsaWithSHA256 (ANSI X9.62 ECDSA algorithm with SHA256)
+  BIT STRING (1 elem)
+    SEQUENCE (2 elem)
+      INTEGER (256 bit) 8398346912588692790750890663641359071361224854764571405243949789847804…
+      INTEGER (256 bit) 1083947229904258680780879442286504260723640719256188292384974456633883…
+~~~
+
+其中以下字段即比特币使用的签名值：
+
+~~~ASN.1
+    SEQUENCE (2 elem)
+      INTEGER (256 bit) 8398346912588692790750890663641359071361224854764571405243949789847804…
+      INTEGER (256 bit) 1083947229904258680780879442286504260723640719256188292384974456633883…
+~~~
+
+该值对TBSCertificate的DER编码结果进行签名，签名来自上级证书。（此处为自签名，即自己）
+
+其中以下字段即比特币使用的公钥：
+
+~~~ASN.1
+      BIT STRING (520 bit) 0000010011001111010011111000110110110010010011101011010111001001011010…
+~~~
+
+该/公钥为该证书的公钥。
 
 ### 需求定义
 
@@ -70,8 +238,6 @@ PKI体系操作和链上协议操作互为镜像，即，每进行一次PKI动�
 
 PKI工具采用openssl
 
-本部分除CA密钥对生成外，可参照[《搭建私有CA服务器》](https://www.cnblogs.com/zhaojiedi1992/p/zhaojiedi_linux_011_ca.html)实现
-
 ##### CA密钥对生成
 
 ~~~bash
@@ -108,13 +274,15 @@ node cli.js key2pem -key [私钥] -out subcert.key
 
 ##### 签发子证书 - 签名
 
+注意：还有CA证书目录、吊销目录、证书序号等CA配置需要提前完成。
+
 ~~~bash
 openssl ca -days 3650 -cert root_ca.crt -keyfile root_ca.key -md sha256 -extensions v3_req -in subcert.csr -out subcert.crt
 ~~~
 
 ##### 子证书吊销
 
-TODO
+参照openssl PKI中的证书吊销
 
 #### 链上协议设计
 
@@ -123,13 +291,14 @@ TODO
 链上记录格式如下
 
 ~~~
-输入1: P2PKH输入（若为coinbase则可省略）
+输入1: 包含公钥签名的输入（若为coinbase则可省略）
 	PK为签名CA证书的公钥
 
 输出1: OP_RETURN输出
-	OP_RETURN [BITCOM协议标识] [CA证书]
-输出2：P2PKH输出
-	输出地址为签名CA证书的公钥确定性衍生而来的衍生地址，使用约定好的衍生路径
+	OP_RETURN <Metanet Flag> <CA公钥𝑃ca> <null(CA是孤点)> <CA证书subject信息（用于索引）> <CA证书crt文件内容>
+输出2：可花费的输出（一般为P2PKH，但不限于此）
+	输出对应的公钥可来自密钥衍生，也可来自其他途径
+	花费该输出意味着证书被吊销
 其他输出及找零
 ~~~
 
@@ -148,9 +317,10 @@ TODO
 	PK为CA证书公钥
 
 输出1: OP_RETURN输出
-	OP_RETURN [BITCOM协议标识] [被签发证书或被签发证书哈希值]
-输出2：P2PKH输出
-	输出地址为被签发证书公钥或CA公钥确定性衍生而来的衍生地址，使用约定好的衍生路径
+	OP_RETURN <Metanet Flag> <子证书公钥𝑃cert> <𝑇𝑥𝐼𝐷ca> <子证书subject信息（用于索引）> <证书crt文件内容>
+输出2：可花费的输出（一般为P2PKH，但不限于此）
+	输出对应的公钥可来自密钥衍生，也可来自其他途径
+	花费该输出意味着证书被吊销
 其他输出及找零
 ```
 
@@ -168,7 +338,8 @@ TODO
 输入1: P2PKH输入
 	花费被吊销证书的输出2
 
-输出1: OP_RETURN输出（若吊销动作来自用户则可省略）
-	OP_RETURN [BITCOM协议标识] [被吊销证书的吊销记录]
+输出1: OP_RETURN输出（Optional）
+	OP_RETURN <Metanet Flag> <花费输入1的公钥𝑃revoke> <𝑇𝑥𝐼𝐷cert> <被吊销证书的吊销记录>
 输出2：其他输出及找零
 ```
+
